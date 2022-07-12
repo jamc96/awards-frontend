@@ -103,7 +103,7 @@ export default function Home() {
   const [selectedTab, setSelectedTab] = useState(tabs[0].label);
   const [selectedRow, setSelectedRow] = useState(schools[0].id);
   return (
-    <div className="h-screen w-screen bg-black text-white px-8 space-y-10 relative flex flex-col">
+    <div className="min-h-screen bg-black text-white px-8 space-y-10 relative flex flex-col">
       {/* header */}
       <div className="flex-1 pt-14 flex flex-col gap-y-6 items-center justify-center w-full ">
         <img src="/logo.jpg" className="w-48 h-48 object-cover" />
@@ -127,37 +127,39 @@ export default function Home() {
       {/* awards table */}
       <div className="w-full">
         <table className="w-full max-w-4xl mx-auto">
-          <tr className=" text-left text-sm border-b border-gray-700">
-            <th className="font-light py-4">#</th>
-            <th className="font-medium">Escuela</th>
-            <th className="font-medium">1ro</th>
-            <th className="font-medium">2do</th>
-            <th className="font-medium">3ro</th>
-            <th className="font-medium">TTL</th>
-            <th className="font-medium">PTS</th>
-          </tr>
-          {schools.map((school, index) => (
-            <tr
-              key={school.id}
-              className={classNames("font-extralight cursor-pointer", {
-                "bg-red-400 rounded-lg": school.id === selectedRow,
-              })}
-              onClick={() => setSelectedRow(school.id)}
-            >
-              <td className="px-2">{index + 1}</td>
-              <td>
-                <div className="py-2 w-24 flex flex-row items-center gap-x-2">
-                  <img src="/logo.jpg" className="w-4 h-4 object-cover" />
-                  <span>{school.name}</span>
-                </div>
-              </td>
-              <td>{school.awards.first}</td>
-              <td>{school.awards.second}</td>
-              <td>{school.awards.third}</td>
-              <td>{school.total}</td>
-              <td>{school.points}</td>
+          <tbody>
+            <tr className=" text-left text-sm border-b border-gray-700">
+              <th className="font-light py-4">#</th>
+              <th className="font-medium">Escuela</th>
+              <th className="font-medium">1ro</th>
+              <th className="font-medium">2do</th>
+              <th className="font-medium">3ro</th>
+              <th className="font-medium">TTL</th>
+              <th className="font-medium">PTS</th>
             </tr>
-          ))}
+            {schools.map((school, index) => (
+              <tr
+                key={school.id}
+                className={classNames("font-extralight cursor-pointer", {
+                  "bg-red-400 rounded-lg": school.id === selectedRow,
+                })}
+                onClick={() => setSelectedRow(school.id)}
+              >
+                <td className="px-2">{index + 1}</td>
+                <td>
+                  <div className="py-2 w-24 flex flex-row items-center gap-x-2">
+                    <img src="/logo.jpg" className="w-4 h-4 object-cover" />
+                    <span>{school.name}</span>
+                  </div>
+                </td>
+                <td>{school.awards.first}</td>
+                <td>{school.awards.second}</td>
+                <td>{school.awards.third}</td>
+                <td>{school.total}</td>
+                <td>{school.points}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
       <div className="h-32 w-full flex flex-col items-center justify-center">
