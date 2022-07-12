@@ -162,8 +162,8 @@ export default function Home() {
       </div>
       <div className="h-32 w-full flex flex-col items-center justify-center">
         <p className="text-center italic font-light">
-          "Un Esfuerzo Total, Es una Victoria Completa. Formando Campeones Para
-          La Vida"
+          {`"Un Esfuerzo Total, Es una Victoria Completa. Formando Campeones Para
+          La Vida"`}
         </p>
       </div>
     </div>
