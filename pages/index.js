@@ -1,173 +1,149 @@
 import classNames from "classnames";
-import Image from "next/image";
 import { useState } from "react";
+import ScoreTable from "./components/scoreTable";
+import ScoreCard from "./components/scoreCard";
+import Image from "./components/shared/image";
 
-export default function Home() {
+export default function Home({ event }) {
   const tabs = [
-    { id: 0, label: "premiaciones" },
-    { id: 1, label: "jugadores" },
+    { id: 0, label: "resultados" },
+    { id: 1, label: "escuelas" },
   ];
-  const schools = [
-    {
-      id: 0,
-      name: "Bill",
-      logo: {
-        url: "/logo.jpg",
-        alternativeText: "some logo",
+
+  const { awards } = event;
+
+  const dataBySchools = awards.map((data) => {
+    const { player, award } = data;
+    if (!player || !award) {
+      return {};
+    }
+
+    return {
+      id: player.school.id,
+      name: player.school.name,
+      image: player.school.image,
+      code: player.school.code,
+      award: {
+        id: award.id,
+        name: award.name,
+        value: award.value,
       },
-      awards: {
-        first: 2,
-        second: 3,
-        third: 5,
+      player: {
+        id: player.id,
+        name: player.name,
+        image: player.image,
       },
-      total: 10,
-      points: 32,
-    },
-    {
-      id: 1,
-      name: "KG",
-      logo: {
-        url: "/logo.jpg",
-        alternativeText: "some logo",
-      },
-      awards: {
-        first: 2,
-        second: 4,
-        third: 1,
-      },
-      total: 7,
-      points: 24,
-    },
-    {
-      id: 2,
-      name: "OSA",
-      logo: {
-        url: "/logo.jpg",
-        alternativeText: "some logo",
-      },
-      awards: {
-        first: 1,
-        second: 1,
-        third: 1,
-      },
-      total: 3,
-      points: 20,
-    },
-    {
-      id: 3,
-      name: "NCA",
-      logo: {
-        url: "/logo.jpg",
-        alternativeText: "some logo",
-      },
-      awards: {
-        first: 1,
-        second: 0,
-        third: 5,
-      },
-      total: 3,
-      points: 18,
-    },
-    {
-      id: 4,
-      name: "GUA",
-      logo: {
-        url: "/logo.jpg",
-        alternativeText: "some logo",
-      },
-      awards: {
-        first: 0,
-        second: 6,
-        third: 5,
-      },
-      total: 11,
-      points: 10,
-    },
-    {
-      id: 5,
-      name: "LGB",
-      logo: {
-        url: "/logo.jpg",
-        alternativeText: "some logo",
-      },
-      awards: {
-        first: 0,
-        second: 0,
-        third: 0,
-      },
-      total: 0,
-      points: 1,
-    },
-  ];
+    };
+  });
+  // this is for object not being generated because it is missing some required value
+  const dataBySchoolsCleaned = dataBySchools.filter(
+    (x) => Object.keys(x).length !== 0
+  );
+
+  let schoolsArray = [];
+  dataBySchoolsCleaned.forEach((school) => {
+    const schoolFound = schoolsArray.find((s) => s.id === school.id);
+
+    if (!schoolFound) {
+      schoolsArray.push({
+        id: school.id,
+        name: school.name,
+        image: school.image,
+        code: school.code,
+        awards: {
+          first: school.award.name.toLowerCase() === "primero" ? 1 : 0,
+          second: school.award.name.toLowerCase() === "segundo" ? 1 : 0,
+          third: school.award.name.toLowerCase() === "tercero" ? 1 : 0,
+        },
+        total: 1,
+        points: school.award.value,
+        players: [{ ...school.player }],
+      });
+    } else {
+      const schoolIndex = schoolsArray.findIndex((s) => s.id === school.id);
+      const currentSchoolAwards = schoolsArray[schoolIndex].awards;
+      const currentSchoolTotal = schoolsArray[schoolIndex].total;
+      const currentSchoolPoints = schoolsArray[schoolIndex].points;
+      schoolsArray[schoolIndex].awards = {
+        first:
+          school.award.name.toLowerCase() === "primero"
+            ? currentSchoolAwards.first + 1
+            : currentSchoolAwards.first,
+        second:
+          school.award.name.toLowerCase() === "segundo"
+            ? currentSchoolAwards.second + 1
+            : currentSchoolAwards.second,
+        third:
+          school.award.name.toLowerCase() === "tercero"
+            ? currentSchoolAwards.third + 1
+            : currentSchoolAwards.third,
+      };
+      schoolsArray[schoolIndex].total = currentSchoolTotal + 1;
+      schoolsArray[schoolIndex].points =
+        currentSchoolPoints + school.award.value;
+    }
+  });
+
+  schoolsArray = schoolsArray.sort((x, y) => (x.points < y.points ? 1 : -1));
 
   const [selectedTab, setSelectedTab] = useState(tabs[0].label);
-  const [selectedRow, setSelectedRow] = useState(schools[0].id);
   return (
-    <div className="min-h-screen bg-black text-white px-8 space-y-10 relative flex flex-col">
+    <div className="min-h-screen bg-gray-900 text-white px-8 relative flex flex-col sm:gap-y-4 ">
       {/* header */}
-      <div className="flex-1 pt-14 flex flex-col gap-y-6 items-center justify-center w-full ">
-        <img src="/logo.jpg" className="w-48 h-48 object-cover" />
-        <h1 className="text-3xl">Copa UTF 2022</h1>
+      <div className="pt-8 flex flex-col gap-y-6 items-center justify-center w-full ">
+        <Image className="w-44 h-44 object-cover" {...event.image} />
+        <h1 className="text-3xl md:text-4xl">{event.name}</h1>
       </div>
       {/* navigation */}
-      <div className="flex flex-row w-full justify-center gap-2 max-w-sm mx-auto">
+      <div className="pb-2 flex flex-row w-full justify-center gap-2 max-w-sm mx-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={classNames("text-center w-full py-2 border-b", {
-              "text-red-600 border-red-600": tab.label === selectedTab,
-              "text-gray-50 border-gray-700": tab.label !== selectedTab,
-            })}
+            className={classNames(
+              "text-center w-full py-2 border-b md:text-lg",
+              {
+                "text-red-600 border-red-600": tab.label === selectedTab,
+                "text-gray-50 border-gray-700": tab.label !== selectedTab,
+              }
+            )}
             onClick={() => setSelectedTab(tab.label)}
           >
             <span className="capitalize">{tab.label}</span>
           </button>
         ))}
       </div>
-      {/* awards table */}
-      <div className="w-full">
-        <table className="w-full max-w-4xl mx-auto">
-          <tbody>
-            <tr className=" text-left text-sm border-b border-gray-700">
-              <th className="font-light py-4">#</th>
-              <th className="font-medium">Escuela</th>
-              <th className="font-medium">1ro</th>
-              <th className="font-medium">2do</th>
-              <th className="font-medium">3ro</th>
-              <th className="font-medium">TTL</th>
-              <th className="font-medium">PTS</th>
-            </tr>
-            {schools.map((school, index) => (
-              <tr
-                key={school.id}
-                className={classNames("font-extralight cursor-pointer", {
-                  "bg-red-400 rounded-lg": school.id === selectedRow,
-                })}
-                onClick={() => setSelectedRow(school.id)}
-              >
-                <td className="px-2">{index + 1}</td>
-                <td>
-                  <div className="py-2 w-24 flex flex-row items-center gap-x-2">
-                    <img src="/logo.jpg" className="w-4 h-4 object-cover" />
-                    <span>{school.name}</span>
-                  </div>
-                </td>
-                <td>{school.awards.first}</td>
-                <td>{school.awards.second}</td>
-                <td>{school.awards.third}</td>
-                <td>{school.total}</td>
-                <td>{school.points}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="h-32 w-full flex flex-col items-center justify-center">
-        <p className="text-center italic font-light">
+      {selectedTab === "resultados" ? (
+        <ScoreTable schools={schoolsArray} />
+      ) : (
+        <ScoreCard
+          schools={schoolsArray}
+          playersBySchool={dataBySchoolsCleaned}
+        />
+      )}
+
+      <div className="h-24 w-full px-8 absolute inset-x-0 bottom-0">
+        <p className="text-center italic font-light md:text-lg">
           {`"Un Esfuerzo Total, Es una Victoria Completa. Formando Campeones Para
           La Vida"`}
         </p>
       </div>
     </div>
   );
+}
+
+export async function getStaticProps() {
+  const res = await fetch("http://localhost:1337/api/events");
+  const events = await res.json();
+
+  const event = events.data[0];
+
+  return {
+    props: {
+      event,
+    },
+    // Next.js will attempt to re-generate the page:
+    // - When a request comes in
+    // - At most once every 10 seconds
+    revalidate: 10, // In seconds
+  };
 }
